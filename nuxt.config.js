@@ -1,6 +1,8 @@
 export default {
+  ssr: false,
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
+
     title: 'cccd',
     htmlAttrs: {
       lang: 'en'
