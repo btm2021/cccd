@@ -6,58 +6,58 @@
           <h1 class="mb-2 mt-3 text-center pb-5">Tạo mới bảng kê mua vào</h1>
         </b-col>
         <b-col cols="12">
-          <b-row>
-            <b-col cols="6">
-              <b-form-group label="Ngày bắt đầu">
-                <b-input v-model="ngaybatdau" autocomplete="off"></b-input>
-              </b-form-group>
-              <b-form-group label="Ngày kết thúc">
-                <b-input v-model="ngayketthuc" autocomplete="off"></b-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="6">
-              <b-form-group label="Số lượng sản phẩm muốn tạo">
-                <b-input v-model="count" autocomplete="off"></b-input>
-              </b-form-group>
+          <b-overlay :show="overlay">
+            <b-row>
+              <b-col cols="6">
+                <b-form-group label="Ngày bắt đầu">
+                  <b-input v-model="info.ngaybatdau" autocomplete="off"></b-input>
+                </b-form-group>
+                <b-form-group label="Ngày kết thúc">
+                  <b-input v-model="info.ngayketthuc" autocomplete="off"></b-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="6">
+                <b-form-group label="Số lượng sản phẩm muốn tạo">
+                  <b-input v-model="count" autocomplete="off"></b-input>
+                </b-form-group>
 
-              <b-form-group label="Tỷ lệ 18K/24k">
-                <b-input v-model="percent" autocomplete="off"></b-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="6">
-              <b-form-group label="Tên Cơ Sở Kinh Doanh">
-                <b-input
-                  v-model="info.tencosokinhdoanh"
-                  autocomplete="off"
-                ></b-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="6">
-              <b-form-group label="Mã số Thuế">
-                <b-input v-model="info.masothue" autocomplete="off"></b-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="6">
-              <b-form-group label="Địa chỉ">
-                <b-input v-model="info.diachi" autocomplete="off"></b-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="6">
-              <b-form-group label="Giám đốc">
-                <b-input v-model="info.giamdoc" autocomplete="off"></b-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-form>
-            <b-button block variant="primary" @click="taodulieu"
-              >Tạo mới</b-button
-            >
+                <b-form-group label="Tỷ lệ 18K/24k">
+                  <b-input v-model="percent" autocomplete="off"></b-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="6">
+                <b-form-group label="Tên Cơ Sở Kinh Doanh">
+                  <b-input
+                    v-model="info.tencosokinhdoanh"
+                    autocomplete="off"
+                  ></b-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="6">
+                <b-form-group label="Mã số Thuế">
+                  <b-input v-model="info.masothue" autocomplete="off"></b-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="6">
+                <b-form-group label="Địa chỉ">
+                  <b-input v-model="info.diachi" autocomplete="off"></b-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="6">
+                <b-form-group label="Giám đốc">
+                  <b-input v-model="info.giamdoc" autocomplete="off"></b-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-form>
+              <b-button variant="primary" @click="taodulieu">Tạo mới</b-button>
 
-            <a :href="strURL" v-if="strURL">
-              <b-icon-arrow-down></b-icon-arrow-down> In Bảng Kê
-            </a>
-          </b-form>
-          <b-table show-empty :items="info.listsanpham"></b-table>
+              <b-button :href="strURL" v-if="strURL" variant="success">
+                <b-icon-arrow-down></b-icon-arrow-down> In Bảng Kê</b-button
+              >
+            </b-form>
+            <b-table show-empty :items="info.listsanpham"></b-table
+          ></b-overlay>
         </b-col>
       </b-row>
     </b-card>
@@ -68,18 +68,20 @@
 export default {
   data() {
     return {
+      overlay: false,
       info: {
         tencosokinhdoanh: "DNTN KD vàng bạc trang sức Bảo Phương",
-        masothue: "41241213412",
+        masothue: "4500568969",
         diachi:
           "Số 118 Huỳnh Phước, Khu phố 4, TT Phước Dân, Ninh Phước, Ninh Thuận",
         giamdoc: "Trịnh Minh Thơm",
         listsanpham: [],
+        ngaybatdau: "1/1/2024",
+        ngayketthuc: this.$moment().subtract(1, "days").format("DD/MM/YYYY"),
       },
-      catSanPham: ["NHẪN", "DÂY", "CÒNG", "LẮC", "BÔNG", "MẶT", "KIỀNG"],
+      catSanPham: ["Nhẫn", "Dây", "Còng", "Lắc", "Bông", "Mặt", "Kiềng"],
       strURL: null,
-      ngaybatdau: "1/1/2024",
-      ngayketthuc: "1/5/2024",
+
       count: 250,
       percent: "20/1",
     };
@@ -124,27 +126,7 @@ export default {
         }
       });
     },
-    b64EncodeUnicode(str) {
-      return btoa(
-        encodeURIComponent(str).replace(
-          /%([0-9A-F]{2})/g,
-          function toSolidBytes(match, p1) {
-            return String.fromCharCode("0x" + p1);
-          }
-        )
-      );
-    },
-    b64DecodeUnicode(str) {
-      // Going backwards: from bytestream, to percent-encoding, to original string.
-      return decodeURIComponent(
-        atob(str)
-          .split("")
-          .map(function (c) {
-            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-          })
-          .join("")
-      );
-    },
+
     findPriceForDate(dateStr, type, listBanggia) {
       //thụt lại 1 ngày
       const dateTimestamp = this.$moment(dateStr, "DD/MM/YYYY")
@@ -168,8 +150,9 @@ export default {
       return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
     async taodulieu() {
-      const timeStart = this.ngaybatdau;
-      const timeEnd = this.ngayketthuc;
+      this.overlay = true;
+      const timeStart = this.info.ngaybatdau;
+      const timeEnd = this.info.ngayketthuc;
       const strStart = this.$moment(timeStart, "DDMM/YYYY").format(
         "YYYY-MM-DD"
       );
@@ -201,8 +184,10 @@ export default {
           thoigian: i.time,
         };
       });
+      console.log(this.info);
       this.info.listsanpham = listsanpham;
       localStorage.setItem("info", JSON.stringify(this.info));
+      this.overlay = false;
       this.strURL = "/print_bangke";
     },
 
@@ -254,7 +239,7 @@ export default {
 
           type: randomType,
           tlv: parseFloat(randomTlv),
-          giatien: this.formatN(parseInt(parseFloat(randomTlv) * price * 1000)),
+          giatien: parseInt(parseFloat(randomTlv) * price * 1000),
           banggia: price,
           tenkhach: String(randomCccd.ten).toUpperCase(),
           diachi: String(randomCccd.diachi).toUpperCase(),

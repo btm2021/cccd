@@ -3,16 +3,16 @@
     <table style="width: 100%">
       <thead>
         <tr>
-          <th colspan="4" class="text-right font-italic"></th>
-          <th colspan="5" class="text-right font-italic text-center">
+          <th colspan="3" class="text-right font-italic"></th>
+          <th colspan="6" class="text-right font-italic text-center">
             Mẫu số: 01/TNDN
           </th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td colspan="4" class=""></td>
-          <td colspan="5" class="text-center font-italic">
+          <td colspan="3" class=""></td>
+          <td colspan="6" class="text-center font-italic">
             (Ban hành kèm theo Thông tư số 78/2014/TT-BTC của Bộ Tài chính)
           </td>
         </tr>
@@ -27,7 +27,7 @@
         </tr>
         <tr>
           <td colspan="9" class="text-center font-italic">
-            (Từ ngày 01/01/2024 đến ngày 31/03/2024)
+            (Từ ngày {{ info.ngaybatdau }} đến ngày {{ info.ngayketthuc }})
           </td>
         </tr>
         <tr>
@@ -87,21 +87,24 @@
           <td class="t tdBorder">{{ item.loaivang }}</td>
           <td class="t tdBorder">{{ item.trongluong }} Chỉ</td>
           <td class="t tdBorder">{{ item.banggia }}</td>
-          <td class="t tdBorder">{{ item.giatien }}</td>
+          <td class="t tdBorder">{{ formatN(item.giatien) }}</td>
           <td class="t tdBorder"></td>
         </tr>
         <tr class="t trBorder">
           <td class="t tdBorder"></td>
           <td class="t tdBorder">Tổng cộng</td>
           <td class="t tdBorder" colspan="3"></td>
-          <td class="t tdBorder">155.9</td>
+          <td class="t tdBorder">{{ info.tongtrongluong }} Chỉ</td>
           <td class="t tdBorder"></td>
-          <td class="t tdBorder">265.266.222</td>
-          <td class="t tdBorder"></td>
+          <td class="t tdBorder">{{ formatN(info.tongsotien) }}</td>
+          <td class="t tdBorder">VND</td>
         </tr>
         <tr class="">
-          <td colspan="9" class="text-left font-weight-bold">
-            Tổng giá trị hàng hoá mua vào:
+          <td colspan="9">
+            <span class="text-left font-weight-bold">
+              Tổng giá trị hàng hoá mua vào:</span
+            >
+            {{ doctien(info.tongsotien) }}
           </td>
         </tr>
         <tr>
@@ -109,7 +112,11 @@
             Người lập bảng kê
           </td>
           <td colspan="4" class="text-center font-weight-bold">
-            Ngày 31 tháng 03 năm 2024
+            {{
+              $moment(info.ngayketthuc, "DD/MM/YYYY").format(
+                "[Ngày] DD [Tháng] MM [Năm] YYYY"
+              )
+            }}
           </td>
         </tr>
         <tr>
@@ -131,6 +138,134 @@
   </div>
 </template>
 <script>
+var DocTienBangChu = function () {
+  this.ChuSo = new Array(
+    " không ",
+    " một ",
+    " hai ",
+    " ba ",
+    " bốn ",
+    " năm ",
+    " sáu ",
+    " bảy ",
+    " tám ",
+    " chín "
+  );
+  this.Tien = new Array(
+    "",
+    " nghìn",
+    " triệu",
+    " tỷ",
+    " nghìn tỷ",
+    " triệu tỷ"
+  );
+};
+
+DocTienBangChu.prototype.docSo3ChuSo = function (baso) {
+  var tram;
+  var chuc;
+  var donvi;
+  var KetQua = "";
+  tram = parseInt(baso / 100);
+  chuc = parseInt((baso % 100) / 10);
+  donvi = baso % 10;
+  if (tram == 0 && chuc == 0 && donvi == 0) return "";
+  if (tram != 0) {
+    KetQua += this.ChuSo[tram] + " trăm ";
+    if (chuc == 0 && donvi != 0) KetQua += " linh ";
+  }
+  if (chuc != 0 && chuc != 1) {
+    KetQua += this.ChuSo[chuc] + " mươi";
+    if (chuc == 0 && donvi != 0) KetQua = KetQua + " linh ";
+  }
+  if (chuc == 1) KetQua += " mười ";
+  switch (donvi) {
+    case 1:
+      if (chuc != 0 && chuc != 1) {
+        KetQua += " mốt ";
+      } else {
+        KetQua += this.ChuSo[donvi];
+      }
+      break;
+    case 5:
+      if (chuc == 0) {
+        KetQua += this.ChuSo[donvi];
+      } else {
+        KetQua += " lăm ";
+      }
+      break;
+    default:
+      if (donvi != 0) {
+        KetQua += this.ChuSo[donvi];
+      }
+      break;
+  }
+  return KetQua;
+};
+
+DocTienBangChu.prototype.doc = function (SoTien) {
+  var lan = 0;
+  var i = 0;
+  var so = 0;
+  var KetQua = "";
+  var tmp = "";
+  var soAm = false;
+  var ViTri = new Array();
+  if (SoTien < 0) soAm = true; //return "Số tiền âm !";
+  if (SoTien == 0) return "Không đồng"; //"Không đồng !";
+  if (SoTien > 0) {
+    so = SoTien;
+  } else {
+    so = -SoTien;
+  }
+  if (SoTien > 8999999999999999) {
+    //SoTien = 0;
+    return ""; //"Số quá lớn!";
+  }
+  ViTri[5] = Math.floor(so / 1000000000000000);
+  if (isNaN(ViTri[5])) ViTri[5] = "0";
+  so = so - parseFloat(ViTri[5].toString()) * 1000000000000000;
+  ViTri[4] = Math.floor(so / 1000000000000);
+  if (isNaN(ViTri[4])) ViTri[4] = "0";
+  so = so - parseFloat(ViTri[4].toString()) * 1000000000000;
+  ViTri[3] = Math.floor(so / 1000000000);
+  if (isNaN(ViTri[3])) ViTri[3] = "0";
+  so = so - parseFloat(ViTri[3].toString()) * 1000000000;
+  ViTri[2] = parseInt(so / 1000000);
+  if (isNaN(ViTri[2])) ViTri[2] = "0";
+  ViTri[1] = parseInt((so % 1000000) / 1000);
+  if (isNaN(ViTri[1])) ViTri[1] = "0";
+  ViTri[0] = parseInt(so % 1000);
+  if (isNaN(ViTri[0])) ViTri[0] = "0";
+  if (ViTri[5] > 0) {
+    lan = 5;
+  } else if (ViTri[4] > 0) {
+    lan = 4;
+  } else if (ViTri[3] > 0) {
+    lan = 3;
+  } else if (ViTri[2] > 0) {
+    lan = 2;
+  } else if (ViTri[1] > 0) {
+    lan = 1;
+  } else {
+    lan = 0;
+  }
+  for (i = lan; i >= 0; i--) {
+    tmp = this.docSo3ChuSo(ViTri[i]);
+    KetQua += tmp;
+    if (ViTri[i] > 0) KetQua += this.Tien[i];
+    if (i > 0 && tmp.length > 0) KetQua += ""; //',';//&& (!string.IsNullOrEmpty(tmp))
+  }
+  if (KetQua.substring(KetQua.length - 1) == ",") {
+    KetQua = KetQua.substring(0, KetQua.length - 1);
+  }
+  KetQua = KetQua.substring(1, 2).toUpperCase() + KetQua.substring(2);
+  if (soAm) {
+    return "Âm " + KetQua + " đồng"; //.substring(0, 1);//.toUpperCase();// + KetQua.substring(1);
+  } else {
+    return KetQua + " đồng"; //.substring(0, 1);//.toUpperCase();// + KetQua.substring(1);
+  }
+};
 export default {
   data() {
     return {
@@ -141,29 +276,28 @@ export default {
   },
   mounted() {
     let localInfo = localStorage.getItem("info");
-    this.info = JSON.parse(localInfo);
+    let info = JSON.parse(localInfo);
+    console.log(info);
+
+    info.tongtrongluong = parseInt(
+      info.listsanpham.reduce((acc, current) => acc + current.trongluong, 0)
+    );
+    info.tongsotien = parseInt(
+      info.listsanpham.reduce(
+        (acc, current) => acc + parseInt(current.giatien),
+        0
+      )
+    );
+
+    this.info = info;
   },
   methods: {
-    b64EncodeUnicode(str) {
-      return btoa(
-        encodeURIComponent(str).replace(
-          /%([0-9A-F]{2})/g,
-          function toSolidBytes(match, p1) {
-            return String.fromCharCode("0x" + p1);
-          }
-        )
-      );
+    doctien(x) {
+      var docTien = new DocTienBangChu();
+      return docTien.doc(x); // return: "Hai  mươi nghìn đồng"
     },
-    b64DecodeUnicode(str) {
-      // Going backwards: from bytestream, to percent-encoding, to original string.
-      return decodeURIComponent(
-        atob(str)
-          .split("")
-          .map(function (c) {
-            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-          })
-          .join("")
-      );
+    formatN(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     },
   },
 };
