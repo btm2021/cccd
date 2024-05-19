@@ -24,12 +24,7 @@ export default {
   bootstrapVue: {
     icons: true
   },
-  moment: {
-    plugins: [
-      'moment-lunar'
-    ]
 
-  },
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     '~/plugins/veevalidator.js',
@@ -41,6 +36,8 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
 
   buildModules: [
+    '@nuxtjs/moment',
+
     ['nuxt-supabase', {
       //  supabaseUrl: `https://spbp.trinhminhbao.workers.dev`,
       supabaseUrl: 'https://ajsrzteoovahabndebyp.supabase.co',
@@ -51,6 +48,7 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
+
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
