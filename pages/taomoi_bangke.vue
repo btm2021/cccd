@@ -214,7 +214,7 @@ export default {
     randomTime() {
       const hour = Math.floor(Math.random() * (18 - 8)) + 8;
       const minute = Math.floor(Math.random() * 60);
-      const amPm = hour < 12 ? "" : "";
+      const amPm = hour < 12 ? "AM" : "PM";
       const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
       return `${formattedHour}:${minute < 10 ? "0" + minute : minute} ${amPm}`;
     },
