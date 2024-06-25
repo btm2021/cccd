@@ -38,14 +38,24 @@
                   <b-input v-model="info.masothue" autocomplete="off"></b-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="6">
+              <b-col cols="3">
                 <b-form-group label="Địa chỉ">
                   <b-input v-model="info.diachi" autocomplete="off"></b-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="6">
+              <b-col cols="3">
                 <b-form-group label="Giám đốc">
                   <b-input v-model="info.giamdoc" autocomplete="off"></b-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3">
+                <b-form-group label="Phần Trăm Giá 610">
+                  <b-input v-model="info.phantramgia" autocomplete="off"></b-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3">
+                <b-form-group label="Phần Trăm Giá 980">
+                  <b-input v-model="info.phantramgia980" autocomplete="off"></b-input>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -70,6 +80,8 @@ export default {
     return {
       overlay: false,
       info: {
+        phantramgia980:97,
+        phantramgia:54,
         tencosokinhdoanh: "DNTN KD vàng bạc trang sức Bảo Phương",
         masothue: "4500568969",
         diachi:
@@ -96,17 +108,18 @@ export default {
             .then((data) => data.json())
             .then((data) => {
               let d = data.results.map((i) => {
+                
                 let p18k =
                   parseInt(
                     (((parseFloat(i.c) + 1) * 1.20565 * 1.05 * 26000 + 400000) *
-                      68) /
+                      parseInt(this.info.phantramgia)) /
                       10000000
                   ) * 10;
 
                 let p24k =
                   parseInt(
                     (((parseFloat(i.c) + 1) * 1.20565 * 1.05 * 26000 + 400000) *
-                      100) /
+                      parseInt(this.info.phantramgia980)) /
                       10000000
                   ) * 10;
 
@@ -180,7 +193,7 @@ export default {
           giatien: i.giatien,
           trongluong: i.tlv,
           banggia: i.banggia,
-          loaivang: `${i.tensanpham} Vàng${i.type}`,
+          loaivang: `${i.tensanpham} Vàng ${i.type==='18k'?'610':'980'}`,
           thoigian: i.time,
         };
       });
